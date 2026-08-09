@@ -27,5 +27,10 @@ testpaths = ["tests"]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+dev = [
+    "pycocotools>=2.0.11",
+]
+
 [tool.setuptools.packages.find]
 include = ["visionforge*"]
