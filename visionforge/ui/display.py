@@ -36,13 +36,14 @@ def format_delta(value: float | None) -> str:
 
 
 def per_class_frame(per_class: dict[int, dict], names: dict[int, str]) -> pd.DataFrame:
-    """Per-class metrics as a display DataFrame (sorted by AP desc)."""
+    """Per-class metrics as a display DataFrame (sorted by AP desc, no-GT last)."""
     rows = []
     for cat_id, pc in per_class.items():
         rows.append(
             {
                 "class_id": cat_id,
                 "class": names.get(cat_id, f"id {cat_id}"),
+                "_ap": pc["ap50"],  # numeric for sorting; -1 (no GT) goes last
                 "ap50": format_score(pc["ap50"]),
                 "precision": format_score(pc["precision"]),
                 "recall": format_score(pc["recall"]),
@@ -54,7 +55,7 @@ def per_class_frame(per_class: dict[int, dict], names: dict[int, str]) -> pd.Dat
         )
     df = pd.DataFrame(rows)
     if not df.empty:
-        df = df.sort_values("ap50", ascending=False).reset_index(drop=True)
+        df = df.sort_values("_ap", ascending=False, na_position="last").drop(columns="_ap").reset_index(drop=True)
     return df
 
 
@@ -94,12 +95,14 @@ def confusion_frame(
     """
     nc = len(gt_categories)
     counts = np.asarray(confusion)
-    # row sum > 0 → has GT; col sum over ALL rows (incl. background) > 0 →
-    # has predictions — a class predicted only as a phantom still shows up
+    # Full row sum > 0 → has GT (INCLUDING the background/FN column — a class
+    # whose GT was entirely missed would otherwise vanish, hiding the classes
+    # that broke). Full col sum > 0 → has predictions (a class predicted only
+    # as a phantom still shows up).
     active = [
         i
         for i in range(nc)
-        if counts[i, :nc].sum() > 0 or counts[:, i].sum() > 0
+        if counts[i, :].sum() > 0 or counts[:, i].sum() > 0
     ]
     labels = [names.get(gt_categories[i].id, f"id {gt_categories[i].id}") for i in active] + ["background"]
     idx = active + [nc]

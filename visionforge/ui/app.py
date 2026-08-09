@@ -8,6 +8,7 @@ Screens:
 Zero API keys, no external calls, sample data pre-loaded (evalforge precedent).
 """
 
+import html
 import json
 import sys
 from pathlib import Path
@@ -60,12 +61,14 @@ def load_sample_data() -> dict | None:
         st.error("Sample data not found. Run `python data/generate_demo_predictions.py` first.")
         return None
     try:
+        with open(GT_SAMPLE) as f:
+            gt_meta = GroundTruth.model_validate(json.load(f))
         run_a = display.evaluate_files(GT_SAMPLE, PREDS_A)
         run_b = display.evaluate_files(GT_SAMPLE, PREDS_B)
         return {
             "run_a": run_a,
             "run_b": run_b,
-            "gt_meta": GroundTruth.model_validate(json.load(open(GT_SAMPLE))),
+            "gt_meta": gt_meta,
         }
     except ValueError as e:
         st.error(f"Sample data failed to load: {e}")
@@ -148,15 +151,24 @@ def verdict_banner(compare: dict, run_a: dict, run_b: dict, label_a: str, label_
     verdict = compare["verdict"]
     agg_a = run_a["aggregate"]
     agg_b = run_b["aggregate"]
-    delta = agg_b["map50"] - agg_a["map50"]
     n_regressed = len(compare["summary"]["regressed_classes"])
+
+    # Aggregate mAP can rise while individual classes regressed (others
+    # improved more) — report the mean drop across regressed classes instead.
+    regressed_drops = [
+        abs(compare["deltas"][cid]["delta_map50"])
+        for cid in compare["summary"]["regressed_classes"]
+        if compare["deltas"][cid]["delta_map50"] is not None
+    ]
+    avg_drop = sum(regressed_drops) / len(regressed_drops) if regressed_drops else 0.0
+
     if verdict == "REGRESSED":
         st.markdown(
             f"""<div class="callout danger">
   <span class="callout-label">{label_a} → {label_b}</span>
   <span>mAP@0.5 <strong>{agg_a['map50']:.3f} → {agg_b['map50']:.3f}</strong> —
-  regressed by {abs(delta):.3f} · <strong>{n_regressed} class{'es' if n_regressed != 1 else ''}</strong>
-  got worse. See the table below for which object types moved.</span>
+  <strong>{n_regressed} class{'es' if n_regressed != 1 else ''}</strong>
+  got worse, averaging {avg_drop:.3f} per class. See the table below for which object types moved.</span>
 </div>""",
             unsafe_allow_html=True,
         )
@@ -234,8 +246,12 @@ def render_compare(compare: dict, run_a: dict, run_b: dict, gt_meta, label_a: st
     if deltas.empty:
         st.caption("No classes to compare.")
     else:
-        # Badges as HTML in a final column (rendered without pandas Styler emojis)
+        # Badges as HTML in the status column (internal enum, safe).
+        # Class names come from the user's GT file — escape them so a crafted
+        # category name cannot inject HTML/JS into the page (XSS).
         deltas["status"] = deltas["status"].map(status_badge)
+        for col in ("class", "delta_map50", "delta_f1"):
+            deltas[col] = deltas[col].map(html.escape)
         st.markdown(deltas.to_html(escape=False, index=False), unsafe_allow_html=True)
 
     # Report card for each run in tabs

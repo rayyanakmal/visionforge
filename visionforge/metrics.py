@@ -316,7 +316,7 @@ def evaluate(
         gt_used: set[int] = set()
         for p in image_preds:
             best_gt = -1
-            best_iou = 0.5
+            best_iou = 0.0  # start below threshold so IoU == 0.5 counts
             for gi, ann in enumerate(image_gt):
                 if gi in gt_used:
                     continue

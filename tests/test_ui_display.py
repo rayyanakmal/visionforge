@@ -92,6 +92,18 @@ class TestPerClassFrame:
         )
         assert df["class"].tolist() == ["high", "low"]
 
+    def test_no_gt_class_sorted_last(self):
+        """-1 (no GT) must sort AFTER real values, not first (string-sort trap)."""
+        df = per_class_frame(
+            {
+                1: {"ap50": -1.0, "precision": 0.0, "recall": 0.0, "f1": 0.0, "tp": 0, "fp": 0, "fn": 0},
+                2: {"ap50": 0.5, "precision": 0.0, "recall": 0.0, "f1": 0.0, "tp": 0, "fp": 0, "fn": 1},
+            },
+            {1: "no_gt", 2: "has_gt"},
+        )
+        assert df["class"].tolist() == ["has_gt", "no_gt"]
+        assert df.iloc[1]["ap50"] == "n/a"
+
 
 class TestPerImageFrame:
     def test_sorts_by_fn_desc(self):
@@ -133,6 +145,22 @@ class TestConfusionFrame:
         )
         assert list(cf.index) == ["person", "car", "background"]
         assert cf.loc["background", "car"] == 1
+
+    def test_all_fn_class_kept(self):
+        """A class whose GT was entirely missed must NOT vanish from the matrix.
+
+        Its counts live in the background (FN) column — the row-sum filter
+        must include that column, or the matrix hides exactly the classes
+        that broke in a regression.
+        """
+        gt = make_gt()
+        names = category_names(gt)
+        # car has GT but every one missed → its row is [0, 0, 1] (FN col)
+        cf = confusion_frame(
+            np.array([[1, 0, 0], [0, 0, 1], [0, 0, 0]], dtype=int), names, gt.categories
+        )
+        assert list(cf.index) == ["person", "car", "background"]
+        assert cf.loc["car", "background"] == 1
 
 
 class TestIouHistogram:
