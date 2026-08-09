@@ -177,6 +177,17 @@ class TestIouHistogram:
         df = iou_histogram([0.5] * 5, bins=20)
         assert len(df) == 20
 
+    def test_default_ten_bins(self):
+        df = iou_histogram([0.5] * 5)
+        assert len(df) == 10
+
+    def test_numeric_index(self):
+        """X-axis must be numeric bin centers, not string labels (which
+        render as a text blob in st.bar_chart)."""
+        df = iou_histogram([0.5] * 5, bins=10)
+        assert pd.api.types.is_numeric_dtype(df.index)
+        assert "bin" not in df.columns
+
 
 class TestDeltaFrame:
     def test_status_badges(self):

@@ -214,7 +214,7 @@ def render_report_card(metrics: dict, gt_meta, title: str):
         if hist.empty:
             st.caption("No matched detections.")
         else:
-            st.bar_chart(hist.set_index("bin"), height=280)
+            st.bar_chart(hist, height=280)
     with col_r:
         st.markdown("**Confusion matrix** — rows = GT, cols = predicted, last = background")
         cf = display.confusion_frame(metrics["confusion"], names, gt_meta.categories)

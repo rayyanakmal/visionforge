@@ -109,13 +109,17 @@ def confusion_frame(
     return pd.DataFrame(counts[np.ix_(idx, idx)], index=labels, columns=labels)
 
 
-def iou_histogram(iou_values: list[float], bins: int = 20) -> pd.DataFrame:
-    """IoU values → histogram counts for st.bar_chart."""
+def iou_histogram(iou_values: list[float], bins: int = 10) -> pd.DataFrame:
+    """IoU values → histogram counts for st.bar_chart.
+
+    Index = numeric bin centers (so the chart x-axis is a clean 0.0→1.0
+    scale, not 20 string labels that render as a text blob).
+    """
     if not iou_values:
-        return pd.DataFrame({"bin": [], "count": []})
+        return pd.DataFrame({"count": []})
     counts, edges = np.histogram(iou_values, bins=bins, range=(0.0, 1.0))
-    labels = [f"{edges[i]:.2f}-{edges[i+1]:.2f}" for i in range(len(edges) - 1)]
-    return pd.DataFrame({"bin": labels, "count": counts})
+    centers = [round((edges[i] + edges[i + 1]) / 2, 3) for i in range(len(edges) - 1)]
+    return pd.DataFrame({"count": counts}, index=centers)
 
 
 def _delta_status(delta: float | None, regressed: bool, threshold: float) -> str:
