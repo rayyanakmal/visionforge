@@ -1,6 +1,6 @@
 """Pydantic models for VisionForge inputs: ground truth + predictions (COCO-style)."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class GTImage(BaseModel):
@@ -19,6 +19,13 @@ class GTAnnotation(BaseModel):
     image_id: int
     category_id: int
     bbox: list[float] = Field(min_length=4, max_length=4)
+
+    @field_validator("bbox")
+    @classmethod
+    def bbox_non_negative(cls, v: list[float]) -> list[float]:
+        if any(x < 0 for x in v):
+            raise ValueError(f"bbox values must be non-negative, got {v}")
+        return v
 
 
 class GTCategory(BaseModel):
