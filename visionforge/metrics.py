@@ -336,5 +336,6 @@ def evaluate(
         "per_class": per_class,
         "per_image": per_image,
         "iou_stats": iou_stats,
+        "iou_values": iou_values,
         "confusion": confusion,
     }

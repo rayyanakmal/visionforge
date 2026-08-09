@@ -103,6 +103,7 @@ class TestEvaluate:
         assert per_image[2] == {"tp": 1, "fp": 0, "fn": 0}
 
         assert result["iou_stats"]["mean"] == pytest.approx(1.0)
+        assert result["iou_values"] == [1.0, 1.0]
         assert result["confusion"].shape == (2, 2)
 
     def test_missing_fixture(self, gt, preds_missing):

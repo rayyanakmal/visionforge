@@ -1,0 +1,8 @@
+# Streamlit Community Cloud installs from this file, not from
+# [project.optional-dependencies] — so the UI runtime deps live here too.
+numpy>=2.4.6
+pillow>=12.3.0
+pydantic>=2.13.4
+typer>=0.27.1
+pandas>=3.0.5
+streamlit>=1.61.1

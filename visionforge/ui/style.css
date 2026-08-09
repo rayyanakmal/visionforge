@@ -1,0 +1,268 @@
+/* VisionForge design system — v1 (2026-08-09)
+   Mirrors evalforge design language (D9): Inter body · Space Grotesk display ·
+   JetBrains Mono data · one accent + neutrals · spacing 4/8/16/24/32 · radius 12px
+   Fonts loaded via <link> tags in app.py (Google Fonts). */
+
+:root {
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-soft: #EFF6FF;
+  --accent-border: #DBEAFE;
+  --bg: #FFFFFF;
+  --bg-soft: #F8FAFC;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text: #0F172A;
+  --text-muted: #64748B;
+  --success: #16A34A;
+  --success-soft: #F0FDF4;
+  --warn: #B45309;
+  --warn-soft: #FFFBEB;
+  --error: #DC2626;
+  --error-soft: #FEF2F2;
+  --radius: 12px;
+  --font-body: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+html, body, [class*="css"] {
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.stApp {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.main > div {
+  padding: 1.5rem 2.25rem;
+}
+.block-container {
+  padding-top: 2.25rem;
+  padding-bottom: 4rem;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  margin: 0.25rem 0 1.75rem;
+}
+.hero .eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
+.hero .hero-title {
+  font-family: var(--font-display);
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.15 !important;
+  color: var(--text) !important;
+  margin: 0 0 0.5rem !important;
+}
+.hero .hero-sub {
+  font-size: 15px !important;
+  color: var(--text-muted) !important;
+  max-width: 660px;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+}
+
+/* ---------- Typography ---------- */
+h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--text) !important;
+}
+p, li {
+  color: var(--text-muted) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+strong { color: var(--text); }
+
+/* ---------- Callout ---------- */
+.callout {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  padding: 0.9rem 1.15rem;
+  margin: 0.25rem 0 1.5rem;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.callout.success {
+  border-left-color: var(--success);
+  background: var(--success-soft);
+}
+.callout.danger {
+  border-left-color: var(--error);
+  background: var(--error-soft);
+}
+.callout.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+.callout .callout-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ---------- Metric cards ---------- */
+[data-testid="stMetric"] {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  transition: border-color 0.15s ease;
+}
+[data-testid="stMetric"]:hover { border-color: var(--border-strong); }
+[data-testid="stMetricLabel"] {
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+[data-testid="stMetricValue"] {
+  font-family: var(--font-mono) !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+}
+[data-testid="stMetricDelta"] {
+  font-size: 12px !important;
+}
+
+/* ---------- DataFrames ---------- */
+[data-testid="stDataFrame"] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+[data-testid="stDataFrame"] thead th {
+  background: var(--bg-soft);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* ---------- Buttons ---------- */
+.stButton > button {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.45rem 1.15rem;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.stButton > button:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+.stButton > button[kind="secondary"] {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.stButton > button[kind="secondary"]:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #fff;
+}
+
+/* ---------- Sidebar ---------- */
+[data-testid="stSidebar"] {
+  background: var(--bg-soft);
+  border-right: 1px solid var(--border);
+}
+[data-testid="stSidebar"] h1 {
+  font-family: var(--font-display);
+  font-size: 18px !important;
+  letter-spacing: -0.01em !important;
+}
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+  font-family: var(--font-display);
+  font-size: 15px !important;
+}
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+  font-size: 12.5px !important;
+}
+
+/* ---------- Expanders & tabs ---------- */
+[data-testid="stExpander"] {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  background: #fff;
+}
+[data-testid="stExpander"] summary {
+  font-weight: 500;
+}
+.stTabs [data-baseweb="tab-list"] {
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.stTabs [data-baseweb="tab"] {
+  border-radius: 8px 8px 0 0;
+  padding: 0.45rem 1rem;
+  font-size: 14px;
+}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- Alerts ---------- */
+[data-testid="stAlert"] {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.footer a:hover { text-decoration: underline; }
+
+/* ---------- Hide Streamlit chrome ---------- */
+#MainMenu, footer, [data-testid="stToolbar"] {
+  visibility: hidden;
+  height: 0;
+}
