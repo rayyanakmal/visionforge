@@ -1,0 +1,31 @@
+[project]
+name = "visionforge"
+version = "0.1.0"
+description = "Vision model report card — grade detection models against labeled data, catch regressions between versions."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.4.6",
+    "pillow>=12.3.0",
+    "pydantic>=2.13.4",
+    "pytest>=9.1.1",
+    "typer>=0.27.1",
+]
+
+[project.scripts]
+visionforge = "visionforge.cli:app"
+
+[project.optional-dependencies]
+ui = [
+    "pandas>=3.0.5",
+    "streamlit>=1.61.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["visionforge*"]
