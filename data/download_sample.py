@@ -63,7 +63,10 @@ def ensure_val_annotations() -> dict:
     else:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         zip_path = DATA_DIR / "annotations_trainval2017.zip"
-        _download(ANN_ZIP_URL, zip_path)
+        if not zip_path.exists():
+            _download(ANN_ZIP_URL, zip_path)
+        else:
+            print(f"using cached {zip_path}")
         print(f"extracting {ANN_VAL_NAME}...")
         with zipfile.ZipFile(zip_path) as zf:
             with zf.open(ANN_ZIP_NAME) as src, open(ANN_VAL_PATH, "wb") as dst:
