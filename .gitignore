@@ -4,4 +4,5 @@ __pycache__/
 .uv/
 data/images/
 data/*.zip
+data/instances_val2017.json
 .pytest_cache/
