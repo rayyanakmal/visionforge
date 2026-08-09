@@ -91,3 +91,62 @@ def write_markdown_report(metrics: dict, path: str) -> None:
 
     with open(path, "w") as f:
         f.write("\n".join(lines))
+
+
+def write_regression_report(
+    base_metrics: dict,
+    candidate_metrics: dict,
+    compare_result: dict,
+    basename: str,
+) -> None:
+    """Write regression comparison outputs (JSON + markdown)."""
+    # JSON: full machine-readable comparison
+    payload = {
+        "verdict": compare_result["verdict"],
+        "deltas": compare_result["deltas"],
+        "summary": compare_result["summary"],
+        "base_aggregate": base_metrics["aggregate"],
+        "candidate_aggregate": candidate_metrics["aggregate"],
+    }
+    with open(f"{basename}.json", "w") as f:
+        json.dump(payload, f, indent=2)
+
+    # Markdown: human-readable diff
+    lines: list[str] = []
+    lines.append("# VisionForge Regression Report")
+    lines.append("")
+    lines.append(f"## Verdict: {compare_result['verdict']}")
+    lines.append("")
+    lines.append("## Per-Class Deltas (candidate - baseline)")
+    lines.append("")
+    lines.append("| Class | Δ mAP@0.5 | Δ F1 | Status |")
+    lines.append("|-------|-----------|------|--------|")
+    for cat_id in sorted(compare_result["deltas"]):
+        d = compare_result["deltas"][cat_id]
+        status = "REGRESSED" if d["regressed"] else "ok"
+        lines.append(
+            f"| {cat_id} | {_fmt(d['delta_map50'])} | {_fmt(d['delta_f1'])} | {status} |"
+        )
+    lines.append("")
+    lines.append("## Baseline (run A)")
+    lines.append("")
+    _append_aggregate(lines, base_metrics)
+    lines.append("")
+    lines.append("## Candidate (run B)")
+    lines.append("")
+    _append_aggregate(lines, candidate_metrics)
+    lines.append("")
+
+    with open(f"{basename}.md", "w") as f:
+        f.write("\n".join(lines))
+
+
+def _append_aggregate(lines: list[str], metrics: dict) -> None:
+    agg = metrics["aggregate"]
+    lines.append("| Metric | Value |")
+    lines.append("|--------|-------|")
+    lines.append(f"| mAP@0.5 | {_fmt(agg['map50'])} |")
+    lines.append(f"| mAP@0.5:0.95 | {_fmt(agg['map'])} |")
+    lines.append(f"| Precision | {_fmt(agg['precision'])} |")
+    lines.append(f"| Recall | {_fmt(agg['recall'])} |")
+    lines.append(f"| F1 | {_fmt(agg['f1'])} |")

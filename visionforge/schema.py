@@ -53,9 +53,38 @@ class Prediction(BaseModel):
 
 
 class PredictionsFile(BaseModel):
-    """Container for a predictions file (COCO results format)."""
+    """Container for a predictions file (COCO results format).
+
+    Accepts either a bare list of detection dicts (standard COCO results
+    format, what YOLO/DETR/etc export) or an object with a "predictions" key.
+    """
 
     predictions: list[Prediction]
+
+    @classmethod
+    def load(cls, data: dict | list) -> "PredictionsFile":
+        if isinstance(data, list):
+            return cls(predictions=data)
+        return cls.model_validate(data)
+
+
+def load_predictions(path: str) -> PredictionsFile:
+    """Load a predictions file from JSON, accepting COCO results (bare list)
+    or wrapped {"predictions": [...]} format."""
+    import json
+
+    with open(path) as f:
+        data = json.load(f)
+    return PredictionsFile.load(data)
+
+
+def load_ground_truth(path: str) -> GroundTruth:
+    """Load a COCO-style ground truth JSON file."""
+    import json
+
+    with open(path) as f:
+        data = json.load(f)
+    return GroundTruth.model_validate(data)
 
 
 def validate_consistency(gt: GroundTruth, preds: PredictionsFile) -> list[str]:
