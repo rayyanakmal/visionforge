@@ -81,12 +81,14 @@ def _group_preds_by_image(preds: list[Prediction]) -> dict[int, list[Prediction]
 def _class_pr_curve(
     class_preds: list[Prediction],
     class_gt_boxes: dict[int, list[list[float]]],
+    iou_threshold: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Precision/recall curve for one class at one IoU threshold.
 
     Matches per (image, category) — a prediction can only match a GT box
-    in the SAME image (COCO protocol). Sorts predictions by score desc
-    across all images, accumulates TP/FP, returns (precisions, recalls).
+    in the SAME image (COCO protocol). A match requires IoU >= iou_threshold.
+    Sorts predictions by score desc across all images, accumulates TP/FP,
+    returns (precisions, recalls).
     """
     if not class_preds:
         return np.array([]), np.array([])
@@ -98,7 +100,6 @@ def _class_pr_curve(
 
     # Per-image greedy match: pred -> GT index (in that image's GT list)
     matched_pred_ids: set[int] = set()  # id() of matched predictions
-    gt_used_by_image: dict[int, set[int]] = {}
 
     for image_id, image_preds in preds_by_image.items():
         gt_boxes = class_gt_boxes.get(image_id, [])
@@ -106,18 +107,17 @@ def _class_pr_curve(
         order = sorted(range(len(image_preds)), key=lambda i: image_preds[i].score, reverse=True)
         for pi in order:
             best_gt = -1
-            best_iou = 0.0
+            best_iou = iou_threshold
             for gi, gbox in enumerate(gt_boxes):
                 if gi in gt_used:
                     continue
                 iou = compute_iou(image_preds[pi].bbox, gbox)
-                if iou > best_iou:
+                if iou >= iou_threshold and iou >= best_iou:
                     best_iou = iou
                     best_gt = gi
             if best_gt >= 0:
                 gt_used.add(best_gt)
                 matched_pred_ids.add(id(image_preds[pi]))
-        gt_used_by_image[image_id] = gt_used
 
     total_gt = sum(len(boxes) for boxes in class_gt_boxes.values())
 
@@ -145,7 +145,7 @@ def _compute_ap_at_threshold(
     """AP for one class at one IoU threshold (COCO protocol)."""
     if not class_gt_boxes or sum(len(v) for v in class_gt_boxes.values()) == 0:
         return -1.0  # no GT → excluded from mAP (COCO convention)
-    precisions, recalls = _class_pr_curve(class_preds, class_gt_boxes)
+    precisions, recalls = _class_pr_curve(class_preds, class_gt_boxes, iou_threshold)
     return compute_ap(precisions, recalls)
 
 

@@ -4,6 +4,7 @@ Style rules: tables, no emoji, numbers rounded to 3 decimals.
 """
 
 import json
+from pathlib import Path
 
 
 def _fmt(x: float | None) -> str:
@@ -12,8 +13,15 @@ def _fmt(x: float | None) -> str:
     return f"{x:.3f}"
 
 
+def _ensure_parent(path: str) -> None:
+    parent = Path(path).parent
+    if parent and not parent.exists():
+        parent.mkdir(parents=True, exist_ok=True)
+
+
 def write_json_report(metrics: dict, path: str) -> None:
     """Write the full metrics dict as JSON (numpy arrays converted to lists)."""
+    _ensure_parent(path)
     payload = {
         "aggregate": metrics["aggregate"],
         "per_class": metrics["per_class"],
@@ -27,6 +35,7 @@ def write_json_report(metrics: dict, path: str) -> None:
 
 def write_markdown_report(metrics: dict, path: str) -> None:
     """Write a human-readable report card (tables, no emoji)."""
+    _ensure_parent(path)
     agg = metrics["aggregate"]
     lines: list[str] = []
 
@@ -100,6 +109,8 @@ def write_regression_report(
     basename: str,
 ) -> None:
     """Write regression comparison outputs (JSON + markdown)."""
+    _ensure_parent(f"{basename}.json")
+    _ensure_parent(f"{basename}.md")
     # JSON: full machine-readable comparison
     payload = {
         "verdict": compare_result["verdict"],

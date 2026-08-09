@@ -132,3 +132,28 @@ class TestEvaluate:
         )
         result = evaluate(preds_full.predictions, gt)
         assert result["aggregate"]["map50"] == pytest.approx(0.0)
+
+    def test_threshold_sweep_differs(self):
+        """AP@0.5 must differ from AP@0.5:0.95 when boxes have mid-range IoU.
+
+        Regression guard for the bug where the IoU threshold was ignored in
+        the PR curve (mAP@0.5 == mAP@0.5:0.95 on real data). A box with
+        IoU 0.75 matches at 0.5 but NOT at 0.8 → APs must differ.
+        """
+        from visionforge.schema import GroundTruth, PredictionsFile
+
+        gt = GroundTruth(
+            images=[{"id": 1, "file_name": "a.jpg", "width": 100, "height": 100}],
+            annotations=[{"id": 1, "image_id": 1, "category_id": 1, "bbox": [0, 0, 10, 10]}],
+            categories=[{"id": 1, "name": "person"}],
+        )
+        # pred box [0, 0, 10, 7.5] → IoU with GT = 0.75 (area 75, overlap 75, union 100)
+        preds = PredictionsFile(predictions=[
+            {"image_id": 1, "category_id": 1, "bbox": [0, 0, 10, 7.5], "score": 0.9},
+        ])
+        result = evaluate(preds.predictions, gt)
+        # At IoU 0.5 and 0.75 it matches (AP=1.0); at 0.8+ it doesn't (AP=0)
+        # mAP@0.5 = 1.0, mAP@0.5:0.95 = (6*1.0 + 4*0.0)/10 = 0.6
+        assert result["aggregate"]["map50"] == pytest.approx(1.0)
+        assert result["aggregate"]["map"] == pytest.approx(0.6)
+        assert result["aggregate"]["map50"] > result["aggregate"]["map"]
