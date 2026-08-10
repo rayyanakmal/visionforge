@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python 3.11+">
-  <img src="https://img.shields.io/badge/tests-78%20passing-brightgreen" alt="78 tests passing">
+  <img src="https://img.shields.io/badge/tests-82%20passing-brightgreen" alt="82 tests passing">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
   <img src="https://img.shields.io/badge/status-v0.1.0-yellow" alt="v0.1.0">
 </p>
@@ -81,6 +81,10 @@ streamlit run visionforge/ui/app.py
 
 The repo ships a real demo: 12 COCO val2017 images with ground truth, plus two YOLOv8n prediction runs (confidence 0.25 vs 0.90). Run the commands above and you get real numbers — mAP@0.5 0.315 for run A, 0.047 for run B, verdict REGRESSED.
 
+For the dashboard's upload flow, the repo also ships a simulated "v2" kit derived from the real run-A output (`data/generate_upload_demo.py`):
+- `examples/preds_v2_mixed.json` — person regresses (−0.146) while dining table improves (+0.743): aggregate mAP actually rises 0.315 → 0.338 as a class breaks (the "mAP hides it" story)
+- `examples/preds_v2_clean.json` — only improvements → verdict PASS, "clean release" banner
+
 ## The regression view
 
 Run A vs run B on the same ground truth:
@@ -95,6 +99,16 @@ Run A vs run B on the same ground truth:
 | chair | +0.000 | ok |
 
 A class regresses when its mAP@0.5 delta drops below `-0.05` (strict `<`, so exactly -0.05 does not flag). Classes present in only one run are reported as `n/a` — never silently zero.
+
+## Web dashboard
+
+`streamlit run visionforge/ui/app.py` (or the [live app](https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/)) — three tabs:
+
+- **Report card** — full per-run card: hero metrics, per-class table, IoU histogram, confusion matrix, per-image detail. When two runs are loaded (sample or upload) both cards appear as nested tabs.
+- **Compare** — verdict banner, aggregate side-by-side, and the per-class delta table with regressed/improved badges. Full report cards live in the Report card tab.
+- **About** — input formats and CLI examples.
+
+The built-in "Sample demo" is the real YOLOv8n pair above (Run A = conf 0.25, Run B = conf 0.90). The upload flow accepts the same formats and renders the same views.
 
 ## Metrics
 

@@ -68,6 +68,8 @@ Edge cases:
 
 **AC-4.3:** Given the Streamlit UI, when a user uploads GT + preds (or loads sample data), then they see the same report card + compare views as the CLI. Zero API keys required.
 
+**AC-4.4:** Given two runs loaded in the UI (sample or upload), when viewing the Report card tab, then both runs' full report cards are shown as nested tabs; the Compare tab shows the verdict banner, aggregate side-by-side, and per-class delta table — no repeated full report cards.
+
 ---
 
 ## Out of Scope (explicitly rejected)

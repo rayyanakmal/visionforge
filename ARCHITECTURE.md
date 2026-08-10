@@ -36,7 +36,8 @@
                           │
 ┌─────────────────────────▼────────────────────────────────────┐
 │                        UI Layer (Streamlit)                  │
-│    upload → report card → compare → about                    │
+│  upload → report card (per-run tabs when 2 runs) → compare   │
+│           (verdict + deltas) → about                         │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -91,10 +92,12 @@ visionforge/
 │   └── test_cli.py
 ├── data/
 │   ├── README.md          # sample dataset notes (NOT committed)
-│   └── download_sample.py # downloads COCO val subset (~100 images)
+│   ├── download_sample.py # downloads COCO val subset (~100 images)
+│   └── generate_upload_demo.py  # simulated v2 candidate runs (derived from real run A)
 └── examples/
     ├── gt_sample.json     # committed tiny sample (5-10 images) for smoke tests
-    └── preds_run_a.json, preds_run_b.json  # Phase 4, committed
+    ├── preds_run_a.json, preds_run_b.json  # real YOLOv8n, Phase 4, committed
+    └── preds_v2_mixed.json, preds_v2_clean.json  # upload demo kit (simulated)
 ```
 
 ---
