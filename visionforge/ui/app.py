@@ -322,7 +322,15 @@ state = build_state()
 tab_report, tab_compare, tab_about = st.tabs(["Report card", "Compare", "About"])
 
 with tab_report:
-    if "run_a" in state:
+    if "run_a" in state and "run_b" in state:
+        # Two runs loaded — surface both report cards (previously only run A
+        # showed here; run B's card was buried in Compare's nested tabs).
+        tabs = st.tabs(["Run A — report card", "Run B — report card"])
+        with tabs[0]:
+            render_report_card(state["run_a"], state["gt_meta"], "Run A report card")
+        with tabs[1]:
+            render_report_card(state["run_b"], state["gt_meta"], "Run B report card")
+    elif "run_a" in state:
         render_report_card(state["run_a"], state["gt_meta"], "Run A — report card")
     else:
         st.info("Upload at least one prediction file to see a report card.")
