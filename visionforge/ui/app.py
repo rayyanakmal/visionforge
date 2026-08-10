@@ -254,13 +254,6 @@ def render_compare(compare: dict, run_a: dict, run_b: dict, gt_meta, label_a: st
             deltas[col] = deltas[col].map(html.escape)
         st.markdown(deltas.to_html(escape=False, index=False), unsafe_allow_html=True)
 
-    # Report card for each run in tabs
-    tabs = st.tabs([f"{label_a} — full report", f"{label_b} — full report"])
-    with tabs[0]:
-        render_report_card(run_a, gt_meta, f"{label_a} report card")
-    with tabs[1]:
-        render_report_card(run_b, gt_meta, f"{label_b} report card")
-
 
 def render_about():
     """About screen: what it is, formats, repo."""
