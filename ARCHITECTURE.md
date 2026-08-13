@@ -188,11 +188,11 @@ visionforge info   # print input schema + example
 
 | Choice | Why |
 |--------|-----|
-| Python 3.11 + uv | Matches evalforge; uv is fast and already proven |
+| Python 3.11 + uv | Matches verdictlab; uv is fast and already proven |
 | numpy only for core | Pure-Python metrics, no torch, no Cython → runs on Pi, deterministic |
 | pydantic | Input validation catches label/bbox mismatches before silent zero-matches (known pitfall) |
-| typer | CLI parity with evalforge, zero-boilerplate |
-| Streamlit + pandas | UI parity with evalforge; report tables render natively |
+| typer | CLI parity with verdictlab, zero-boilerplate |
+| Streamlit + pandas | UI parity with verdictlab; report tables render natively |
 | pytest | Golden hand-computed tests (V2), TDD loop |
 
 **Deliberately NOT used:** pycocotools (Cython dep — implement the documented protocol in numpy, cross-check in one test), torchmetrics (pulls torch), Ultralytics (AGPL-3.0 — structure referenced, code written independently), FiftyOne (MongoDB platform — overkill).
@@ -224,6 +224,6 @@ Applied from landscape research:
 2. Per-image TP/FP/FN table — Ultralytics `image_metrics` pattern (structure only, not code)
 3. Confusion matrix (nc+1, nc+1) background row/col — same
 4. `--fail-on-regression` CI exit code — HoneyHive `compare_runs()` pattern
-5. evalforge tracker pattern (accumulate → summarize, zeros-not-errors) — schema/metrics design
+5. verdictlab tracker pattern (accumulate → summarize, zeros-not-errors) — schema/metrics design
 
 Rejected: FiftyOne platform model, torchmetrics, Ultralytics code (AGPL), VLMEvalKit benchmark runner, W&B experiment tracking.

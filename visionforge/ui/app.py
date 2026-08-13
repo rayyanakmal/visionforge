@@ -5,7 +5,7 @@ Screens:
 - Compare: run A vs run B deltas with regressed/improved badges + verdict banner.
 - About: what it does, input formats, repo link.
 
-Zero API keys, no external calls, sample data pre-loaded (evalforge precedent).
+Zero API keys, no external calls, sample data pre-loaded (verdictlab precedent).
 """
 
 import html

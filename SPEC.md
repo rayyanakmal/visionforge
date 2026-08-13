@@ -4,7 +4,7 @@
 
 VisionForge evaluates object detection models against labeled images and tells you when a new model version makes things worse. You give it ground truth boxes (COCO JSON) and prediction boxes from any detector (YOLO, DETR, R-CNN, SAM — anything that exports COCO format), and it produces a report card: mAP, precision/recall/F1 per class, IoU statistics, confusion counts, and a run A vs run B regression diff with a PASS/REGRESSED verdict.
 
-The name combines **Vision** + **Forge** (evalforge's sibling — the place where raw model outputs are shaped into measurable results).
+The name combines **Vision** + **Forge** (verdictlab's sibling — the place where raw model outputs are shaped into measurable results).
 
 ---
 
