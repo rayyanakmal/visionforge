@@ -2,19 +2,19 @@
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/tests-82%20passing-brightgreen" alt="82 tests passing">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
-  <img src="https://img.shields.io/badge/status-v0.1.0-yellow" alt="v0.1.0">
+  <img src="https://img.shields.io/badge/version-v0.1.0-blue" alt="v0.1.0">
 </p>
 
-<h1 align="center">VisionForge</h1>
-<p align="center"><em>The report card for your vision models.</em></p>
+<h1 align="center">👁️ VisionForge</h1>
+<p align="center"><em>The report card for your vision models — grades the boxes <strong>and</strong> catches the regression.</em></p>
 
 <p align="center">
+  <a href="https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/"><strong>🚀 Try the Live Demo</strong></a> ·
   <a href="#what-is-this"><strong>What is this</strong></a> ·
   <a href="#how-it-works"><strong>How it works</strong></a> ·
   <a href="#quick-start"><strong>Quickstart</strong></a> ·
+  <a href="#features"><strong>Features</strong></a> ·
   <a href="#the-regression-view"><strong>The regression view</strong></a> ·
-  <a href="#metrics"><strong>Metrics</strong></a> ·
-  <a href="#who-is-this-for"><strong>Who is this for</strong></a> ·
   <a href="SPEC.md"><strong>Spec</strong></a> ·
   <a href="ARCHITECTURE.md"><strong>Architecture</strong></a>
 </p>
@@ -29,14 +29,11 @@ Object detection models output bounding boxes with confidence scores. The questi
 
 The special feature is the **regression view**: grade the same images with the old model and the new model, and VisionForge tells you which object types got *worse* — before your customers see it.
 
-- **Detector-agnostic** — works with predictions from YOLO, DETR, R-CNN, or anything that exports COCO-format JSON
-- **Pure Python + numpy core** — no torch, no GPU, no Cython; runs anywhere
-- **CI-ready** — `--fail-on-regression` exits non-zero when a run regressed, so a bad release fails the build
-- **Deterministic and reproducible** — same inputs, byte-identical report
-
 <div align="center">
-  <img src="assets/compare.png" alt="VisionForge compare view — run A vs run B showing 12 regressed classes" width="700">
-  <p><em>The regression view: 12 classes got worse when the model config changed.</em></p>
+  <a href="https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/">
+    <img src="assets/compare.png" alt="VisionForge compare view — run A vs run B with the verdict banner and per-class delta table" width="700">
+  </a>
+  <p><em>Live app: verdict banner, aggregate side-by-side, and per-class deltas with regressed/improved badges.</em></p>
 </div>
 
 ---
@@ -55,8 +52,24 @@ The special feature is the **regression view**: grade the same images with the o
 - **You provide the answer key** — COCO-style ground truth JSON (images, annotations, categories)
 - **Your model provides its guesses** — COCO-style results JSON (image_id, category_id, bbox, score)
 - **VisionForge does the grading** — greedy IoU matching per class (validated against pycocotools), COCO protocol metrics, and a per-image failure table
+- **Compare two runs** — same GT, old vs new predictions → per-class deltas and a PASS / REGRESSED verdict
 
 No model training, no API keys, no external calls. The demo runs entirely in your browser.
+
+---
+
+## Live Demo
+
+Try the deployed app: **https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/**
+
+The demo ships pre-loaded with a real sample: 12 COCO val2017 images, ground truth, and two YOLOv8n prediction runs (confidence 0.25 vs 0.90). The Report card tab shows run A's full card; load run B and both cards appear as nested tabs; the Compare tab shows the verdict and per-class deltas. You can also upload your own COCO-format JSON — same formats, same views.
+
+### Deploy to Streamlit Community Cloud
+
+1. Push this repo to GitHub
+2. Go to [streamlit.io/cloud](https://streamlit.io/cloud) → **New app** → connect the `visionforge` repo
+3. Main file path: `visionforge/ui/app.py`
+4. Deploy — no secrets, no API keys, no external services. The app is fully self-contained.
 
 ---
 
@@ -85,6 +98,39 @@ For the dashboard's upload flow, the repo also ships a simulated "v2" kit derive
 - `examples/preds_v2_mixed.json` — person regresses (−0.146) while dining table improves (+0.743): aggregate mAP actually rises 0.315 → 0.338 as a class breaks (the "mAP hides it" story)
 - `examples/preds_v2_clean.json` — only improvements → verdict PASS, "clean release" banner
 
+---
+
+## Features
+
+### 📊 The report card
+- **COCO protocol metrics** — mAP@0.5, mAP@0.5:0.95, precision/recall/F1, all per-class
+- **IoU distribution** — p50/p90 + histogram of matched detections
+- **Confusion matrix** with background row/column — catches phantom-object failures that mAP hides
+- **Per-image TP/FP/FN** — see exactly which images are hardest
+
+### 🚨 Catch regressions before they ship
+- **Before/after comparison** — same ground truth, old vs new predictions, per-class deltas
+- **Verdict PASS / REGRESSED** — a class regresses when its mAP@0.5 delta drops below `-0.05` (strict `<`; classes in only one run are reported `n/a`, never silently zero)
+- **CI gate** — `--fail-on-regression` exits 1 on regression, so a bad release fails the build
+
+### 🔬 Deterministic and reproducible
+- **Pure Python + numpy core** — no torch, no GPU, no Cython; runs anywhere
+- **Byte-identical reports** — same inputs, same output, every time
+- **Schema validation** with consistency warnings (unknown categories/images)
+
+### 🧩 Detector-agnostic
+- Works with predictions from YOLO, DETR, R-CNN, or anything that exports COCO-format JSON
+- Ground truth and predictions are plain JSON files — no vendor lock-in
+
+### 🖥️ Web dashboard
+- **Report card tab** — hero metrics, per-class table, IoU histogram, confusion matrix, per-image detail; both runs' cards as nested tabs when two are loaded
+- **Compare tab** — verdict banner, aggregate side-by-side, per-class delta table
+- **About tab** — input formats and CLI examples
+- **Upload support** — drop in your own COCO JSON, same views
+- **Zero config** — no API keys, no secrets, no external calls
+
+---
+
 ## The regression view
 
 Run A vs run B on the same ground truth:
@@ -100,15 +146,7 @@ Run A vs run B on the same ground truth:
 
 A class regresses when its mAP@0.5 delta drops below `-0.05` (strict `<`, so exactly -0.05 does not flag). Classes present in only one run are reported as `n/a` — never silently zero.
 
-## Web dashboard
-
-`streamlit run visionforge/ui/app.py` (or the [live app](https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/)) — three tabs:
-
-- **Report card** — full per-run card: hero metrics, per-class table, IoU histogram, confusion matrix, per-image detail. When two runs are loaded (sample or upload) both cards appear as nested tabs.
-- **Compare** — verdict banner, aggregate side-by-side, and the per-class delta table with regressed/improved badges. Full report cards live in the Report card tab.
-- **About** — input formats and CLI examples.
-
-The built-in "Sample demo" is the real YOLOv8n pair above (Run A = conf 0.25, Run B = conf 0.90). The upload flow accepts the same formats and renders the same views.
+---
 
 ## Metrics
 
@@ -121,6 +159,8 @@ All metrics follow the COCO evaluation protocol (Lin et al., 2014), implemented 
 - **IoU distribution** of matched detections (p50/p90, histogram)
 - **Confusion matrix** with background row/column — catches phantom-object failures that mAP hides
 - **Per-image TP/FP/FN** — which images are hardest
+
+---
 
 ## Input format (COCO-style)
 
@@ -140,22 +180,136 @@ Predictions (bare COCO results list, or `{"predictions": [...]}`):
 
 Bounding boxes are `[x, y, width, height]`. `visionforge info` prints this schema.
 
-## Who is this for?
+---
 
-- **ML/AI engineers** shipping detection models — prove quality, catch regressions between versions
-- **Computer vision teams** — CI gate for model releases (`--fail-on-regression`)
-- **Founders** building vision products (QC, surveillance, retail) — know when a model update breaks things
-- **Freelancers** doing detection integration — show clients measurable before/after quality
-- **Students** learning detection evaluation — read a clean numpy implementation of the COCO protocol
+## Example Output
 
-## Explicitly out of scope (v1)
+`visionforge evaluate` prints a one-line summary and writes `report.json` + `report.md`:
 
-- No training or fine-tuning
-- No tracking / MOT metrics (v2 extension)
-- No annotation tooling (GT is an input file)
-- No video processing (v2 extension)
-- No API keys, no cloud dependencies in the core
+```
+mAP@0.5: 0.315
+mAP@0.5:0.95: 0.249
+precision/recall/F1: 0.660/0.330/0.440
+reports written: report.json, report.md
+```
+
+The JSON report (trimmed) looks like:
+
+```json
+{
+  "aggregate": {
+    "map50": 0.315,
+    "map": 0.249,
+    "precision": 0.660,
+    "recall": 0.330,
+    "f1": 0.440,
+    "tp": 35,
+    "fp": 18,
+    "fn": 71
+  },
+  "per_class": {
+    "person": {"ap50": 0.577, "precision": 0.789, "recall": 0.625, "tp": 15, "fp": 4, "fn": 9},
+    "car":    {"ap50": 1.0,   "precision": 1.0,   "recall": 1.0,   "tp": 2,  "fp": 0, "fn": 0}
+  },
+  "iou_stats": {"mean": 0.72, "median": 0.75, "p50": 0.75, "p90": 0.91},
+  "confusion": { "...": "nc+1 matrix with background row/column" }
+}
+```
+
+`visionforge compare` prints the per-class regression table:
+
+```
+verdict: REGRESSED
+  person       REGRESSED: delta mAP@0.5 = -0.409
+  car          REGRESSED: delta mAP@0.5 = -1.000
+  dog          REGRESSED: delta mAP@0.5 = -0.505
+  dining table REGRESSED: delta mAP@0.5 = -0.089
+```
 
 ---
 
-MIT licensed. Built with numpy, pydantic, typer, and Streamlit. Methodology follows the COCO evaluation protocol; independent implementation, no Ultralytics or pycocotools code.
+## Web dashboard
+
+`streamlit run visionforge/ui/app.py` (or the [live app](https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/)) — three tabs:
+
+- **Report card** — full per-run card: hero metrics, per-class table, IoU histogram, confusion matrix, per-image detail. When two runs are loaded (sample or upload) both cards appear as nested tabs.
+- **Compare** — verdict banner, aggregate side-by-side, and the per-class delta table with regressed/improved badges. Full report cards live in the Report card tab.
+- **About** — input formats and CLI examples.
+
+The built-in "Sample demo" is the real YOLOv8n pair above (Run A = conf 0.25, Run B = conf 0.90). The upload flow accepts the same formats and renders the same views.
+
+---
+
+## Architecture
+
+```
+CLI Layer (typer)
+    └─▶ evaluate | compare | info
+            │
+Core Engine Layer
+    ├─ schema (pydantic) — GT + predictions validation
+    ├─ matching — greedy per-image per-class IoU matching
+    ├─ metrics — AP (101-pt), precision/recall/F1, IoU stats, confusion
+    └─ regression — per-class deltas, PASS/REGRESSED verdict
+            │
+UI Layer (Streamlit)
+    ├─ upload → report card (per-run tabs when 2 runs) → compare
+    └─ (verdict + deltas) → about
+```
+
+**Key design principle (V4):** matching produces a per-detection IoU table ONCE. All thresholds (0.5, 0.75, 0.5:0.95) are derived at report time from that table — never re-run inference or re-match per threshold.
+
+---
+
+## Project Status
+
+**v0.1.0** — Core evaluation engine (pure numpy, COCO protocol), regression comparison with CI gate, CLI, and a three-tab Streamlit dashboard. See [Versions](#versions).
+
+### Roadmap
+
+- [x] Core engine: greedy IoU matching, COCO protocol metrics
+- [x] Regression comparison with PASS/REGRESSED verdict + CI gate
+- [x] CLI (`evaluate`, `compare`, `info`)
+- [x] Streamlit dashboard (report card / compare / about)
+- [x] Sample demo (12 COCO val images, 2 YOLOv8n runs)
+- [x] Upload demo kit (simulated v2 stories)
+- [ ] Tracking / MOT metrics (v2)
+- [ ] Video processing (v2)
+- [ ] Custom IoU thresholds + confusion-matrix export
+
+---
+
+## Versions
+
+| Version | What it is |
+|---------|-----------|
+| **v0.1.0** | First public release — COCO protocol evaluation, regression comparison, CLI, dashboard |
+
+**Live demo:** https://visionforge-sxbb3ltfcuftm66zfzvgkx.streamlit.app/ — load the built-in sample pair (or upload your own COCO JSON) to see the report card and compare views in action.
+
+---
+
+## References
+
+- [SPEC.md](SPEC.md) — Full behavior spec with acceptance criteria
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Design, interfaces, extension points
+- [CHANGELOG.md](CHANGELOG.md) — Version history
+- [assets/compare.png](assets/compare.png) — Compare view screenshot (regenerable via scripts/capture_shots.py)
+- [assets/report-card.png](assets/report-card.png) — Report card screenshot (regenerable via scripts/capture_shots.py)
+- [examples/gt_sample.json](examples/gt_sample.json) — Demo ground truth (12 COCO val2017 images, 106 annotations, 25 categories)
+- [examples/preds_run_a.json](examples/preds_run_a.json) — YOLOv8n conf 0.25 run (mAP@0.5 0.315)
+- [examples/preds_run_b.json](examples/preds_run_b.json) — YOLOv8n conf 0.90 run (mAP@0.5 0.047)
+- [examples/preds_v2_mixed.json](examples/preds_v2_mixed.json) / [preds_v2_clean.json](examples/preds_v2_clean.json) — Simulated v2 upload demo (generated by data/generate_upload_demo.py)
+- [data/generate_upload_demo.py](data/generate_upload_demo.py) — Simulated v2 generator (derived from real run-A output)
+
+---
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+<p align="center">
+  Built by <a href="https://github.com/rayyanakmal">@rayyanakmal</a>
+</p>
